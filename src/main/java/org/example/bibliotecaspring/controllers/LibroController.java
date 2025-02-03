@@ -1,8 +1,11 @@
 package org.example.bibliotecaspring.controllers;
 
+import jakarta.validation.Valid;
 import org.example.bibliotecaspring.models.Libro;
 import org.example.bibliotecaspring.repositories.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/libros")
+@CacheConfig(cacheNames = {"libros"})
 public class LibroController {
 
     LibroRepository libroRepository;
@@ -34,18 +38,24 @@ public class LibroController {
     }
 
     @GetMapping("/{isbn}")
+    @Cacheable
     public ResponseEntity<Libro> getLibro(@PathVariable String isbn) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Libro libro = libroRepository.findById(isbn).orElseThrow();
         return ResponseEntity.ok(libro);
     }
 
     @PostMapping
-    public ResponseEntity<Libro> addLibro(@RequestBody Libro libro) {
+    public ResponseEntity<Libro> addLibro(@Valid @RequestBody Libro libro) {
         return ResponseEntity.ok(libroRepository.save(libro));
     }
 
     @PutMapping
-    public ResponseEntity<Libro> updateLibro(@RequestBody Libro libro) {
+    public ResponseEntity<Libro> updateLibro(@Valid @RequestBody Libro libro) {
         return ResponseEntity.ok(libroRepository.save(libro));
     }
 
